@@ -2,8 +2,8 @@ package open.aqrlei.com.coordinatorsample.behavior
 
 import android.content.Context
 import android.os.Handler
-import android.support.design.widget.CoordinatorLayout
-import android.support.v4.view.ViewCompat
+import androidx.coordinatorlayout.widget.CoordinatorLayout
+import androidx.core.view.ViewCompat
 import android.util.AttributeSet
 import android.view.View
 import android.widget.Scroller
@@ -14,7 +14,7 @@ import java.lang.ref.WeakReference
  * @author  aqrLei on 2018/7/27
  */
 class HeaderScrollingBehavior(context: Context, attrs: AttributeSet) :
-        CoordinatorLayout.Behavior<View>(context, attrs) {
+       CoordinatorLayout.Behavior<View>(context, attrs) {
 
     private var isScrolling: Boolean = false
     private var dependView: WeakReference<View>? = null

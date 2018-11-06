@@ -2,7 +2,7 @@ package open.aqrlei.com.coordinatorsample.behavior
 
 import android.animation.ArgbEvaluator
 import android.content.Context
-import android.support.design.widget.CoordinatorLayout
+import androidx.coordinatorlayout.widget.CoordinatorLayout
 import android.util.AttributeSet
 import android.view.View
 import open.aqrlei.com.coordinatorsample.R
@@ -24,7 +24,7 @@ class HeaderFloatBehavior(context: Context, attrs: AttributeSet) :
 
 
 
-    override fun onDependentViewChanged(parent: CoordinatorLayout, child: View, dependency: View):
+    override fun onDependentViewChanged(parent:CoordinatorLayout, child: View, dependency: View):
             Boolean {
         dependency.resources?.let {
 
