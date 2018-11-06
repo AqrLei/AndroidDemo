@@ -4,10 +4,13 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
-import android.support.v7.app.AppCompatActivity
-import android.support.v7.widget.*
 import android.util.Log
 import android.view.View
+import androidx.appcompat.app.AppCompatActivity
+import androidx.recyclerview.widget.GridLayoutManager
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
+import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import kotlinx.android.synthetic.main.activity_recycler.*
 
 /**
@@ -52,7 +55,7 @@ class RecyclerActivity : AppCompatActivity(), View.OnClickListener {
                 recyclerV.apply {
                     layoutManager = LinearLayoutManager(this@RecyclerActivity, RecyclerView.VERTICAL, false)
                     adapter = RecyclerSimpleAdapter(this@RecyclerActivity, data)
-                    addItemDecoration(DividerItemDecoration(this@RecyclerActivity, RecyclerView.VERTICAL))
+                    addItemDecoration(androidx.recyclerview.widget.DividerItemDecoration(this@RecyclerActivity, RecyclerView.VERTICAL))
                 }
 
             }
