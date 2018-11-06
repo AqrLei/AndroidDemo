@@ -4,12 +4,12 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
+import android.telephony.PhoneNumberUtils
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.SearchView
-import android.telephony.PhoneNumberUtils
 import kotlinx.android.synthetic.main.activity_http.*
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.android.UI
 import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import java.io.BufferedReader
@@ -46,8 +46,8 @@ class HttpUrlConnectionActivity : AppCompatActivity() {
     private fun initView() {
         searchTelInfoV.onActionViewExpanded()
         searchTelInfoV.setIconifiedByDefault(false)
-        searchTelInfoV.queryHint ="输入手机号码,提交后搜索"
-        searchTelInfoV.isSubmitButtonEnabled= true
+        searchTelInfoV.queryHint = "输入手机号码,提交后搜索"
+        searchTelInfoV.isSubmitButtonEnabled = true
         searchTelInfoV.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
             override fun onQueryTextChange(newText: String?): Boolean {
                 return true
@@ -58,7 +58,7 @@ class HttpUrlConnectionActivity : AppCompatActivity() {
                     val job = GlobalScope.async {
                         connectionResponse(query!!)
                     }
-                    GlobalScope.launch(UI) {
+                    GlobalScope.launch(Dispatchers.Main) {
                         contentTv.text = job.await()
                     }
                 }
@@ -67,14 +67,14 @@ class HttpUrlConnectionActivity : AppCompatActivity() {
         })
     }
 
-    private fun connectionResponse(tel:String): String {
+    private fun connectionResponse(tel: String): String {
         val connection = getHttpUrlConnection(tel)
         val inputStream = connection.inputStream
         val reader = BufferedReader(InputStreamReader(inputStream, "gbk"))
         return reader.readText()
     }
 
-    private fun getHttpUrlConnection(tel:String): HttpURLConnection {
+    private fun getHttpUrlConnection(tel: String): HttpURLConnection {
         val mUrl = URL("https://tcc.taobao.com/cc/json/mobile_tel_segment.htm?tel=$tel")
         val mHttpURLConnection = mUrl.openConnection() as HttpURLConnection
         mHttpURLConnection.apply {
