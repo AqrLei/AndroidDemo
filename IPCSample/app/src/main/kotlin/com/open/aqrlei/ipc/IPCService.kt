@@ -3,8 +3,8 @@ package com.open.aqrlei.ipc
 import android.app.Service
 import android.content.Intent
 import android.os.*
-import kotlinx.coroutines.experimental.Job
-import kotlinx.coroutines.experimental.launch
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
 
 /**
  * @author  aqrLei on 2018/7/20
