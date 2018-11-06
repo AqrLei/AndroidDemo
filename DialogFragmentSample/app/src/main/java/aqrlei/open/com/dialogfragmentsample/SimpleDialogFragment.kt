@@ -2,8 +2,8 @@ package aqrlei.open.com.dialogfragmentsample
 
 import android.graphics.Bitmap
 import android.os.Bundle
-import android.support.v4.app.DialogFragment
-import android.support.v4.app.FragmentManager
+import androidx.fragment.app.DialogFragment
+import androidx.fragment.app.FragmentManager
 import android.util.DisplayMetrics
 import android.view.LayoutInflater
 import android.view.View
@@ -14,7 +14,7 @@ import kotlinx.android.synthetic.main.fragment_simple_dialog.*
 /**
  * @author  aqrLei on 2018/7/23
  */
-class SimpleDialogFragment : DialogFragment() {
+class SimpleDialogFragment : androidx.fragment.app.DialogFragment() {
     companion object {
         private const val simpleTag = "simple_dialog_fragment"
         fun newInstance() = SimpleDialogFragment()
@@ -99,7 +99,7 @@ class SimpleDialogFragment : DialogFragment() {
         return this
     }
 
-    fun show(manager: FragmentManager?) {
+    fun show(manager: androidx.fragment.app.FragmentManager?) {
         super.show(manager, simpleTag)
     }
 }
