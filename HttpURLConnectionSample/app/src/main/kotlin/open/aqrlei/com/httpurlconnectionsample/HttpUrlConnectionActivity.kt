@@ -4,13 +4,14 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
-import android.support.v7.app.AppCompatActivity
-import android.support.v7.widget.SearchView
+import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.SearchView
 import android.telephony.PhoneNumberUtils
 import kotlinx.android.synthetic.main.activity_http.*
-import kotlinx.coroutines.experimental.android.UI
-import kotlinx.coroutines.experimental.async
-import kotlinx.coroutines.experimental.launch
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.android.UI
+import kotlinx.coroutines.async
+import kotlinx.coroutines.launch
 import java.io.BufferedReader
 import java.io.InputStreamReader
 import java.net.HttpURLConnection
@@ -54,10 +55,10 @@ class HttpUrlConnectionActivity : AppCompatActivity() {
 
             override fun onQueryTextSubmit(query: String?): Boolean {
                 if (PhoneNumberUtils.isGlobalPhoneNumber(query)) {
-                    val job = async {
+                    val job = GlobalScope.async {
                         connectionResponse(query!!)
                     }
-                    launch(UI) {
+                    GlobalScope.launch(UI) {
                         contentTv.text = job.await()
                     }
                 }
