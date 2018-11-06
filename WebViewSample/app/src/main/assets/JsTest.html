@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8"/>
+    <title> WebView</title>
+    <script>
+        function callJsByLoad(){
+           alert("来自Android的调用")
+        }
+         function callJsByEvaluate(){
+           return "Javascript的返回值"
+        }
+        function callAndroidByAlert(){
+           alert("alert被拦截了")
+        }
+        function callAndroid(){
+        Android.callFromJs("来自Javascript的调用")
+        }
+        function callAndroidByUrl(){
+         document.location = "https://www.baidu.com";
+         }
+    </script>
+
+</head>
+<body>
+<p align="center">用于与Android Native之间的测试</p>
+<button  type="button" id="button1" onclick="callAndroid()">call Android by object</button>
+<button  type="button" id="button2" onclick="callAndroidByUrl()">call Android by url</button>
+<button  type="button" id="button3" onclick="callAndroidByAlert()">call Android by alert</button>
+<a href="aqrlei://sample:8888/test?testId=10011002">打开SchemeActivity</a>
+</body>
+
+</html>

@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@android:color/transparent">
+
+    <android.support.design.widget.TabLayout
+        android:id="@+id/labelTl"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintBottom_toTopOf="@+id/viewPager"
+        app:layout_constraintTop_toTopOf="parent"
+        app:tabBackground="@android:color/white"
+        app:tabGravity="fill"
+        app:tabIndicatorColor="@android:color/holo_green_light"
+        app:tabIndicatorHeight="1dp"
+        app:tabMode="fixed"
+        app:tabSelectedTextColor="@android:color/holo_green_light"
+        app:tabTextAppearance="@style/TabTextAppearance"
+        app:tabTextColor="@android:color/background_dark">
+
+        <android.support.design.widget.TabItem
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:text="测试一" />
+
+        <android.support.design.widget.TabItem
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:text="测试二" />
+
+        <android.support.design.widget.TabItem
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:text="测试三" />
+    </android.support.design.widget.TabLayout>
+
+    <android.support.v4.view.ViewPager
+        android:id="@+id/viewPager"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_marginTop="10dp"
+        android:background="@android:color/white"
+        app:layout_constraintBottom_toTopOf="@+id/withTabPagerTv"
+        app:layout_constraintTop_toBottomOf="@+id/labelTl" />
+
+
+    <TextView
+        android:id="@+id/withTabPagerTv"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="10dp"
+        android:layout_marginRight="10dp"
+        android:background="@drawable/shape_button_simple"
+        android:gravity="center"
+        android:padding="10dp"
+        android:text="PagerWithTab"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toLeftOf="@+id/removeTabPagerTv"
+        app:layout_constraintTop_toBottomOf="@+id/viewPager" />
+
+    <TextView
+        android:id="@+id/removeTabPagerTv"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="10dp"
+        android:layout_marginRight="10dp"
+        android:background="@drawable/shape_button_simple"
+        android:gravity="center"
+        android:padding="10dp"
+        android:text="Remove Tab"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintLeft_toRightOf="@+id/withTabPagerTv"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/viewPager" />
+
+</android.support.constraint.ConstraintLayout>

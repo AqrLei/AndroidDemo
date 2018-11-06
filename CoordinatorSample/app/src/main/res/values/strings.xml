@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">CoordinatorSample</string>
+    <string name="header_float_behavior">open.aqrlei.com.coordinatorsample.behavior.HeaderFloatBehavior</string>
+    <string name="header_scrolling_behavior">open.aqrlei.com.coordinatorsample.behavior.HeaderScrollingBehavior</string>
+</resources>
