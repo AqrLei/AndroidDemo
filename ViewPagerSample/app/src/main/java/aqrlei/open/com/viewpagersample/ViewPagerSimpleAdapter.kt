@@ -1,6 +1,6 @@
 package  aqrlei.open.com.viewpagersample
 
-import android.support.v4.view.PagerAdapter
+import androidx.viewpager.widget.PagerAdapter
 import android.view.View
 import android.view.ViewGroup
 
