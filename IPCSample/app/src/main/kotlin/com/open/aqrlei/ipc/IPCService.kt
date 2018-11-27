@@ -3,6 +3,7 @@ package com.open.aqrlei.ipc
 import android.app.Service
 import android.content.Intent
 import android.os.*
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 
@@ -60,7 +61,7 @@ class IPCService : Service() {
     private val mListenerManager = object : IListenerManager.Stub() {
         override fun setChangeListener(listener: IChangeListener?) {
             changeListener = listener
-            job = launch {
+            job = GlobalScope.launch {
                 var i = 0
                 while (true) {
                     i++
