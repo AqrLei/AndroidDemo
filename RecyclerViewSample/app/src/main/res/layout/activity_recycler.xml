@@ -8,7 +8,6 @@
         android:id="@+id/recyclerV"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_margin="10dp"
         app:layout_constraintBottom_toTopOf="@+id/buttonLl"
         app:layout_constraintTop_toTopOf="parent" />
 

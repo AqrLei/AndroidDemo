@@ -48,7 +48,7 @@ class RecyclerActivity : AppCompatActivity(), View.OnClickListener {
     }
 
     private fun setRecyclerView(type: RecyclerType) {
-        val data = arrayListOf("one", "two", "three", "one-two-three-four-five-six-seven-eight-nine-ten-eleven-twelve",
+        val data = arrayListOf("one", "two", "three",
                 "four", "five", "six", "seven", "eight", "nine", "ten", "eleven", "twelve")
         when (type) {
             RecyclerType.LINEAR -> {
@@ -62,7 +62,7 @@ class RecyclerActivity : AppCompatActivity(), View.OnClickListener {
             RecyclerType.CRID -> {
                 recyclerV.apply {
                     /*一行分成二列*/
-                    layoutManager = GridLayoutManager(this@RecyclerActivity, 2, RecyclerView.VERTICAL, false).also {
+                  /*  layoutManager = GridLayoutManager(this@RecyclerActivity, 2, RecyclerView.VERTICAL, false).also {
                         it.spanSizeLookup = object : GridLayoutManager.SpanSizeLookup() {
                             override fun getSpanSize(position: Int): Int {
                                 Log.d("recycler", "position: $position,data: ${data[position]}")
@@ -70,7 +70,9 @@ class RecyclerActivity : AppCompatActivity(), View.OnClickListener {
                                 else 1// 占二分之一
                             }
                         }
-                    }
+                    }*/
+                    layoutManager = GridLayoutManager(this@RecyclerActivity, 2, RecyclerView.VERTICAL, false)
+                    addItemDecoration(RecyclerItemDecoration(2,30,false))
                     adapter = RecyclerSimpleAdapter(this@RecyclerActivity, data)
                 }
 
