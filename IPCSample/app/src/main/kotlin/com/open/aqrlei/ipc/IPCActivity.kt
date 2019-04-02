@@ -6,9 +6,17 @@ import android.content.Context
 import android.content.Intent
 import android.content.ServiceConnection
 import android.os.*
-import androidx.appcompat.app.AppCompatActivity
+import android.text.method.ScrollingMovementMethod
 import android.view.View
+import androidx.appcompat.app.AppCompatActivity
+import com.open.aqrlei.ipc.contentprovider.OrderProvider
 import kotlinx.android.synthetic.main.activity_ipc.*
+import java.io.*
+import java.net.Socket
+import java.text.SimpleDateFormat
+import java.util.*
+import java.util.concurrent.Executors
+import kotlin.concurrent.thread
 
 
 /**
@@ -18,6 +26,8 @@ class IPCActivity : AppCompatActivity(), View.OnClickListener {
     companion object {
         const val RECEIVE_FROM_SERVICE_CODE_INIT = 1
         const val RECEIVE_FROM_SERVICE_CODE_NORMAL = 11
+        const val LOCAL_SOCKET_CONNECTED = 21
+        const val LOCAL_SOCKET_SEND_MESSAGE = 22
         const val RECEIVE_FROM_SERVICE_DATA = "receiveDataFromService"
         fun open(context: Context) {
             val intent = Intent(context, IPCActivity::class.java)
@@ -26,7 +36,7 @@ class IPCActivity : AppCompatActivity(), View.OnClickListener {
             }
         }
 
-        internal class ClientMessengerHandler(private val activity: IPCActivity) : Handler() {
+        internal class ClientMessengerHandler(private val activity: IPCActivity) : Handler(Looper.getMainLooper()) {
             var service: Messenger? = null
             override fun handleMessage(msg: Message?) {
                 when (msg?.what) {
@@ -37,6 +47,14 @@ class IPCActivity : AppCompatActivity(), View.OnClickListener {
                     }
                     RECEIVE_FROM_SERVICE_CODE_NORMAL -> {
                         activity.setContextText(msg.data)
+                    }
+                    LOCAL_SOCKET_CONNECTED -> { // socket 连接创建完毕
+                        activity.setChangeListenerTv.isEnabled = true
+                    }
+                    LOCAL_SOCKET_SEND_MESSAGE -> { // socket 回传信息
+                        val time = SimpleDateFormat("hh:mm:ss.SSS", Locale.ROOT).format(System.currentTimeMillis())
+                        val message = (msg.obj?.toString() ?: "Empty") + "-$time"
+                        activity.setContextText(message)
                     }
                 }
                 super.handleMessage(msg)
@@ -58,7 +76,10 @@ class IPCActivity : AppCompatActivity(), View.OnClickListener {
                     override fun msgChange(info: Info?) {
                         runOnUiThread {
                             info?.let {
-                                contentAIDLTv.text = "msg: ${it.data}, times: ${it.times}"
+                                val time = SimpleDateFormat("hh:mm:ss.SSS", Locale.ROOT).format(System.currentTimeMillis())
+                                val msg = "${it.data}-$time"
+                                setContextText(msg)
+
                             }
                         }
                     }
@@ -72,9 +93,10 @@ class IPCActivity : AppCompatActivity(), View.OnClickListener {
                         mBinder = IBinderPool.Stub.asInterface(service)
                         mBinder?.let {
                             clientMessengerHandler.service = Messenger(it.queryBinder(IPCService.MESSENGER_BINDER_CODE))
+                            sendMsgInit(clientMessengerHandler.service!!)
                             listenerManager = IListenerManager.Stub.asInterface(it.queryBinder(IPCService.AIDL_BINDER_CODE))
+                            listenerManager?.setChangeListener(changeListener)
                         }
-
                     }
 
                     override fun onServiceDisconnected(name: ComponentName?) {
@@ -86,7 +108,13 @@ class IPCActivity : AppCompatActivity(), View.OnClickListener {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_ipc)
+        val intent = Intent(this, IPCService::class.java)
+        bindService(intent, mCon, Service.BIND_AUTO_CREATE)
         setListener()
+        contentTv.movementMethod = ScrollingMovementMethod.getInstance()
+        thread {
+            connectTcpServer()
+        }
     }
 
     private fun setListener() {
@@ -94,31 +122,46 @@ class IPCActivity : AppCompatActivity(), View.OnClickListener {
         unBindServiceTv.setOnClickListener(this)
         sendMsgTv.setOnClickListener(this)
         setChangeListenerTv.setOnClickListener(this)
+        setChangeListenerTv.isEnabled = false
     }
 
     override fun onClick(v: View?) {
         when (v?.id) {
             R.id.bindServiceTv -> {
-                val intent = Intent(this, IPCService::class.java)
-                bindService(intent, mCon, Service.BIND_AUTO_CREATE)
+                /*  val intent = Intent(this, IPCService::class.java)
+                  bindService(intent, mCon, Service.BIND_AUTO_CREATE)*/
             }
             R.id.unBindServiceTv -> {
                 unbindService(mCon)
                 clientMessengerHandler.service = null
             }
             R.id.sendMsgTv -> {
+                contentResolver.insert(OrderProvider.ORDER_URL, null)
                 clientMessengerHandler.service?.let {
-                    sendMsgInit(it)
+                    sendMsgNormal(it)
                 }
             }
             R.id.setChangeListenerTv -> {
-                listenerManager?.setChangeListener(changeListener)
+                Executors.newSingleThreadExecutor().execute {
+                    val time = SimpleDateFormat("hh:mm:ss.SSS", Locale.ROOT).format(System.currentTimeMillis())
+                    mPrintWriter?.println("Hello Socket:$time")
+                }
+
             }
         }
     }
 
+
     fun setContextText(bundle: Bundle) {
-        contentTv.text = bundle.getString(RECEIVE_FROM_SERVICE_DATA)
+        contentAIDLTv.text = ""
+        contentAIDLTv.append(bundle.getString(RECEIVE_FROM_SERVICE_DATA))
+        contentAIDLTv.append("\n")
+    }
+
+
+    fun setContextText(str: String) {
+        contentTv.append(str)
+        contentTv.append("\n")
     }
 
     fun sendMsgNormal(service: Messenger) {
@@ -131,5 +174,52 @@ class IPCActivity : AppCompatActivity(), View.OnClickListener {
                     replyTo = Messenger(clientMessengerHandler)
                 }
         )
+    }
+
+
+    private var mClientSocket: Socket? = null
+    private var mPrintWriter: PrintWriter? = null
+    private fun connectTcpServer() {
+        var socket: Socket? = null
+        while (socket == null) {
+            try {
+                socket = Socket("localhost", 9999)
+                mClientSocket = socket
+                mPrintWriter = PrintWriter(BufferedWriter(OutputStreamWriter(socket.getOutputStream())), true)
+                clientMessengerHandler.sendEmptyMessage(LOCAL_SOCKET_CONNECTED)
+            } catch (e: IOException) {
+                SystemClock.sleep(1000)
+            }
+        }
+
+        try {
+            BufferedReader(InputStreamReader(socket.getInputStream())).use {
+                while (!this.isFinishing) {
+                    var msg = it.readLine()
+                    if (!msg.isNullOrEmpty()) {
+                        val time = SimpleDateFormat("hh:mm:ss.SSS", Locale.ROOT).format(System.currentTimeMillis())
+                        msg = "$msg-$time"
+                        clientMessengerHandler.obtainMessage(LOCAL_SOCKET_SEND_MESSAGE, msg).sendToTarget()
+                    }
+                }
+            }
+        } catch (e: IOException) {
+            e.printStackTrace()
+        }
+
+    }
+
+
+    override fun onDestroy() {
+        if (mClientSocket != null) {
+            try {
+                mPrintWriter?.close()
+                mClientSocket?.shutdownInput()
+                mClientSocket?.close()
+            } catch (e: IOException) {
+                e.printStackTrace()
+            }
+        }
+        super.onDestroy()
     }
 }

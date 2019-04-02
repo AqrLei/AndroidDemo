@@ -33,10 +33,11 @@
 
     <TextView
         android:id="@+id/contentTv"
+        android:scrollbars="vertical"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:gravity="center"
-        android:text="content"
+        android:text=""
         app:layout_constraintBottom_toTopOf="@+id/sendMsgTv"
         app:layout_constraintTop_toBottomOf="@+id/bindServiceTv" />
 
@@ -46,16 +47,17 @@
         android:layout_height="50dp"
         android:background="@drawable/shape_button_simple"
         android:gravity="center"
-        android:text="sendMsgByHandler"
+        android:text="ContentProviderTest"
         app:layout_constraintBottom_toTopOf="@+id/contentAIDLTv"
         app:layout_constraintTop_toBottomOf="@+id/contentTv" />
 
     <TextView
         android:id="@+id/contentAIDLTv"
+        android:scrollbars="vertical"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:gravity="center"
-        android:text="content"
+        android:text=""
         app:layout_constraintBottom_toTopOf="@+id/setChangeListenerTv"
         app:layout_constraintTop_toBottomOf="@+id/sendMsgTv" />
 
@@ -63,9 +65,9 @@
         android:id="@+id/setChangeListenerTv"
         android:layout_width="match_parent"
         android:layout_height="50dp"
-        android:background="@drawable/shape_button_simple"
+        android:background="@drawable/selector_enable_button"
         android:gravity="center"
-        android:text="setListener"
+        android:text="SocketTest"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/contentAIDLTv" />
 

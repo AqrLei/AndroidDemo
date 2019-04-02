@@ -5,6 +5,7 @@ import android.content.Context
 import android.database.Cursor
 import android.database.sqlite.SQLiteDatabase
 import android.util.Log
+import kotlin.random.Random
 
 /**
  * @author aqrlei on 2019/2/27
@@ -30,13 +31,15 @@ class DatabaseOperator private constructor() {
     fun insert(useSQL: Boolean = true) {
         database?.let { db ->
             try {
+                clearTable()
                 db.beginTransaction()
                 if (useSQL) {
                     db.execSQL("insert into Orders(Id,CustomName,OrderPrice,Country) values(1,'LeoArc', 1000, 'US')")
                 } else {
                     val values = ContentValues()
+                    val id = Random.nextInt()
                     values.apply {
-                        put("Id", 5)
+                        put("Id", id)
                         put("CustomName", "ArcLeo")
                         put("OrderPrice", 10000)
                         put("Country", "UK")
@@ -52,7 +55,13 @@ class DatabaseOperator private constructor() {
         }
     }
 
+    @Throws(Exception::class)
+    private fun clearTable() {
+        database?.execSQL("delete from Orders")
+    }
+
     fun delete(useSQL: Boolean): Int {
+
         var result = -1
         database?.let { db ->
             try {
@@ -79,7 +88,6 @@ class DatabaseOperator private constructor() {
             try {
                 db.beginTransaction()
                 if (useSQL) {
-
                     db.execSQL("update Orders set OrderPrice = 5000  where Id = 1")
 
                 } else {
@@ -101,8 +109,8 @@ class DatabaseOperator private constructor() {
     fun query(): Cursor? {
         return database?.query(
                 "Orders", arrayOf("Id", "CustomName", "OrderPrice", "Country"),
-                "CustomName = ?",
-                arrayOf("ArcLeo"), null, null, null)
+                null,
+                null, null, null, null)
     }
 
     fun search(useSQL: Boolean): List<Order> {

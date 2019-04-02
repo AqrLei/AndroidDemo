@@ -1,7 +1,6 @@
 package com.open.aqrlei.ipc.contentprovider.database
 
 import android.database.sqlite.SQLiteDatabase
-import com.open.aqrlei.ipc.contentprovider.database.DatabaseHelper
 import java.util.concurrent.atomic.AtomicInteger
 
 /**
@@ -17,7 +16,8 @@ class DatabaseManager private constructor() {
         }
 
         fun getInstance() =
-            instance ?: throw IllegalStateException(DatabaseManager::class.java.simpleName + "is not initialized")
+                instance
+                        ?: throw IllegalStateException(DatabaseManager::class.java.simpleName + "is not initialized")
     }
 
     //保证数据库的线程安全
@@ -28,7 +28,7 @@ class DatabaseManager private constructor() {
     @Synchronized
     fun openDatabase(): SQLiteDatabase? {
         if (openCounter.incrementAndGet() == 1) {
-            database = databaseHelper.readableDatabase
+            database = databaseHelper.writableDatabase
         }
         return database
     }

@@ -24,7 +24,7 @@ class OrderProvider : ContentProvider() {
     private lateinit var dataBaseOperator: DatabaseOperator
 
     override fun insert(uri: Uri, values: ContentValues?): Uri? {
-        dataBaseOperator.insert()
+        dataBaseOperator.insert(false)
         return uri
     }
 
