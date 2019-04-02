@@ -13,4 +13,5 @@ class JniTest {
     external fun stringFromJNI(): String
 
     external fun setStringToJNI(value:String)
+
 }
