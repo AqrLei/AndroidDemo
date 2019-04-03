@@ -1,15 +1,17 @@
 # IPCDemo
 An Android IPC  sample
 
-- Bundle
+- Bundle(使用场景,源码分析-putXXX,getXXX)
 
-- 文件共享(sharedPreference特例除外)
+- 文件共享(使用场景,示例)(sharedPreference特例除外)
 
-- Messenger(基于AIDL)
+- Messenger(使用场景,源码分析，示例; 基于AIDL也就是说底层是Binder)
 
-- AIDL
+- AIDL(各种示例,使用场景)
 
-- ContentProvider
+- ContentProvider(源码分析，使用示例) 
+
+- Socket(示例) 
 
 - Binder连接池(基于AIDL)
 
