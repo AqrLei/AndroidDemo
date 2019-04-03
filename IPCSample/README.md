@@ -1,7 +1,6 @@
 # IPCDemo
 An Android IPC  sample
 
-
 - Bundle
 
 - 文件共享(sharedPreference特例除外)
