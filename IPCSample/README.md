@@ -13,4 +13,3 @@ An Android IPC  sample
 
 - Binder连接池(基于AIDL)
 
-

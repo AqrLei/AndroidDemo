@@ -66,6 +66,8 @@ class IPCActivity : AppCompatActivity(), View.OnClickListener {
                 object : ServiceConnection {
                     override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
                         mBinder = IBinderPool.Stub.asInterface(service)
+                        //设置死亡监听
+                        service?.linkToDeath(mDeathRecipient, 0)
                         mBinder?.let {
                             clientMessengerHandler.service = Messenger(it.queryBinder(IPCService.MESSENGER_BINDER_CODE))
                             sendMsgInit(clientMessengerHandler.service!!)
@@ -74,11 +76,22 @@ class IPCActivity : AppCompatActivity(), View.OnClickListener {
                         }
                     }
 
-                    override fun onServiceDisconnected(name: ComponentName?) {
-
-                    }
+                    override fun onServiceDisconnected(name: ComponentName?) {}
                 }
             }
+
+    private val mDeathRecipient = object : IBinder.DeathRecipient {
+        /**
+         * 远程服务端由于某种原因终止，此时Binder"死亡",当Binder死亡时，
+         * 会回调此方法，在此处调用unlinkToDeath且将Binder置为NULL,
+         * 并重新绑定服务
+         * */
+        override fun binderDied() {
+            mBinder?.asBinder()?.unlinkToDeath(this, 0)
+            mBinder = null
+            bindService(intent, mCon, Service.BIND_AUTO_CREATE)
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
