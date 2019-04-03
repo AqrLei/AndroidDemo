@@ -22,7 +22,6 @@ class IPCService : Service() {
         const val AIDL_BINDER_CODE = 1
         const val RECEIVE_FROM_CLIENT_CODE_INIT = 2
         const val RECEIVE_FROM_CLIENT_CODE_NORMAL = 21
-        const val RECEIVE_FROM_CLIENT_DATA = "receiveDataFromClient"
     }
 
     private var changeListener: IChangeListener? = null

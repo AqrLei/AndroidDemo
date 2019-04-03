@@ -12,6 +12,7 @@ import androidx.appcompat.app.AppCompatActivity
 import com.open.aqrlei.ipc.contentprovider.OrderProvider
 import kotlinx.android.synthetic.main.activity_ipc.*
 import java.io.*
+import java.lang.ref.WeakReference
 import java.net.Socket
 import java.text.SimpleDateFormat
 import java.util.*
@@ -36,37 +37,14 @@ class IPCActivity : AppCompatActivity(), View.OnClickListener {
             }
         }
 
-        internal class ClientMessengerHandler(private val activity: IPCActivity) : Handler(Looper.getMainLooper()) {
-            var service: Messenger? = null
-            override fun handleMessage(msg: Message?) {
-                when (msg?.what) {
-                    RECEIVE_FROM_SERVICE_CODE_INIT -> {
-                        service?.let {
-                            activity.sendMsgNormal(it)
-                        }
-                    }
-                    RECEIVE_FROM_SERVICE_CODE_NORMAL -> {
-                        activity.setContextText(msg.data)
-                    }
-                    LOCAL_SOCKET_CONNECTED -> { // socket 连接创建完毕
-                        activity.setChangeListenerTv.isEnabled = true
-                    }
-                    LOCAL_SOCKET_SEND_MESSAGE -> { // socket 回传信息
-                        val time = SimpleDateFormat("hh:mm:ss.SSS", Locale.ROOT).format(System.currentTimeMillis())
-                        val message = (msg.obj?.toString() ?: "Empty") + "-$time"
-                        activity.setContextText(message)
-                    }
-                }
-                super.handleMessage(msg)
-            }
-        }
+
     }
 
 
     private var mBinder: IBinderPool? = null
     private val clientMessengerHandler: ClientMessengerHandler
             by lazy {
-                ClientMessengerHandler(this)
+                ClientMessengerHandler(WeakReference(this))
             }
     private var listenerManager: IListenerManager? = null
 
@@ -111,23 +89,25 @@ class IPCActivity : AppCompatActivity(), View.OnClickListener {
         val intent = Intent(this, IPCService::class.java)
         bindService(intent, mCon, Service.BIND_AUTO_CREATE)
         setListener()
-        contentTv.movementMethod = ScrollingMovementMethod.getInstance()
+        firstContentTv.movementMethod = ScrollingMovementMethod.getInstance()
         thread {
             connectTcpServer()
         }
     }
 
     private fun setListener() {
-        bindServiceTv.setOnClickListener(this)
+        fileTestTv.setOnClickListener(this)
         unBindServiceTv.setOnClickListener(this)
-        sendMsgTv.setOnClickListener(this)
-        setChangeListenerTv.setOnClickListener(this)
-        setChangeListenerTv.isEnabled = false
+        socketTv.setOnClickListener(this)
+        contentProviderTv.setOnClickListener(this)
+        contentProviderTv.isEnabled = false
+
     }
 
+    private val threadPool = Executors.newSingleThreadExecutor()
     override fun onClick(v: View?) {
         when (v?.id) {
-            R.id.bindServiceTv -> {
+            R.id.fileTestTv -> {
                 /*  val intent = Intent(this, IPCService::class.java)
                   bindService(intent, mCon, Service.BIND_AUTO_CREATE)*/
             }
@@ -135,33 +115,32 @@ class IPCActivity : AppCompatActivity(), View.OnClickListener {
                 unbindService(mCon)
                 clientMessengerHandler.service = null
             }
-            R.id.sendMsgTv -> {
+            R.id.socketTv -> {
+                threadPool.execute {
+                    val time = SimpleDateFormat("hh:mm:ss.SSS", Locale.ROOT).format(System.currentTimeMillis())
+                    mPrintWriter?.println("Hello Socket:$time")
+                }
+            }
+            R.id.contentProviderTv -> {
                 contentResolver.insert(OrderProvider.ORDER_URL, null)
                 clientMessengerHandler.service?.let {
                     sendMsgNormal(it)
                 }
-            }
-            R.id.setChangeListenerTv -> {
-                Executors.newSingleThreadExecutor().execute {
-                    val time = SimpleDateFormat("hh:mm:ss.SSS", Locale.ROOT).format(System.currentTimeMillis())
-                    mPrintWriter?.println("Hello Socket:$time")
-                }
-
             }
         }
     }
 
 
     fun setContextText(bundle: Bundle) {
-        contentAIDLTv.text = ""
-        contentAIDLTv.append(bundle.getString(RECEIVE_FROM_SERVICE_DATA))
-        contentAIDLTv.append("\n")
+        secondContentTv.text = ""
+        secondContentTv.append(bundle.getString(RECEIVE_FROM_SERVICE_DATA))
+        secondContentTv.append("\n")
     }
 
 
     fun setContextText(str: String) {
-        contentTv.append(str)
-        contentTv.append("\n")
+        firstContentTv.append(str)
+        firstContentTv.append("\n")
     }
 
     fun sendMsgNormal(service: Messenger) {
@@ -221,5 +200,30 @@ class IPCActivity : AppCompatActivity(), View.OnClickListener {
             }
         }
         super.onDestroy()
+    }
+
+    class ClientMessengerHandler(private val activity: WeakReference<IPCActivity>) : Handler(Looper.getMainLooper()) {
+        var service: Messenger? = null
+        override fun handleMessage(msg: Message?) {
+            when (msg?.what) {
+                RECEIVE_FROM_SERVICE_CODE_INIT -> {
+                    service?.let {
+                        activity.get()?.sendMsgNormal(it)
+                    }
+                }
+                RECEIVE_FROM_SERVICE_CODE_NORMAL -> {
+                    activity.get()?.setContextText(msg.data)
+                }
+                LOCAL_SOCKET_CONNECTED -> { // socket 连接创建完毕
+                    activity.get()?.contentProviderTv?.isEnabled = true
+                }
+                LOCAL_SOCKET_SEND_MESSAGE -> { // socket 回传信息
+                    val time = SimpleDateFormat("hh:mm:ss.SSS", Locale.ROOT).format(System.currentTimeMillis())
+                    val message = (msg.obj?.toString() ?: "Empty") + "-$time"
+                    activity.get()?.setContextText(message)
+                }
+            }
+            super.handleMessage(msg)
+        }
     }
 }
