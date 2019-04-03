@@ -10,7 +10,7 @@
         android:layout_height="50dp"
         android:background="@drawable/shape_button_simple"
         android:gravity="center"
-        android:text="bindService"
+        android:text="FileTest"
         app:layout_constraintBottom_toTopOf="@+id/firstContentTv"
         app:layout_constraintHorizontal_chainStyle="spread_inside"
         app:layout_constraintLeft_toLeftOf="parent"

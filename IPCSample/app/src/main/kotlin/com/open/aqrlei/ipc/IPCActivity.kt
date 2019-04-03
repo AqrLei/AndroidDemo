@@ -10,6 +10,7 @@ import android.text.method.ScrollingMovementMethod
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import com.open.aqrlei.ipc.contentprovider.OrderProvider
+import com.open.aqrlei.ipc.file.FileStreamUtil
 import kotlinx.android.synthetic.main.activity_ipc.*
 import java.io.*
 import java.lang.ref.WeakReference
@@ -29,15 +30,14 @@ class IPCActivity : AppCompatActivity(), View.OnClickListener {
         const val RECEIVE_FROM_SERVICE_CODE_NORMAL = 11
         const val LOCAL_SOCKET_CONNECTED = 21
         const val LOCAL_SOCKET_SEND_MESSAGE = 22
+        const val RECEIVE_FROM_SERVICE_CODE_FILE = 111
         const val RECEIVE_FROM_SERVICE_DATA = "receiveDataFromService"
-        fun open(context: Context) {
+        fun start(context: Context) {
             val intent = Intent(context, IPCActivity::class.java)
             if (queryActivities(context, intent)) {
                 context.startActivity(intent)
             }
         }
-
-
     }
 
 
@@ -54,14 +54,11 @@ class IPCActivity : AppCompatActivity(), View.OnClickListener {
                     override fun msgChange(info: Info?) {
                         runOnUiThread {
                             info?.let {
-                                val time = SimpleDateFormat("hh:mm:ss.SSS", Locale.ROOT).format(System.currentTimeMillis())
                                 val msg = "${it.data}-$time"
-                                setContextText(msg)
-
+                                setFirstContentText(msg)
                             }
                         }
                     }
-
                 }
             }
     private val mCon: ServiceConnection
@@ -90,26 +87,36 @@ class IPCActivity : AppCompatActivity(), View.OnClickListener {
         bindService(intent, mCon, Service.BIND_AUTO_CREATE)
         setListener()
         firstContentTv.movementMethod = ScrollingMovementMethod.getInstance()
+        file = FileStreamUtil.getCacheFile(this)
         thread {
             connectTcpServer()
         }
+
     }
 
     private fun setListener() {
-        fileTestTv.setOnClickListener(this)
         unBindServiceTv.setOnClickListener(this)
         socketTv.setOnClickListener(this)
+        fileTestTv.setOnClickListener(this)
         contentProviderTv.setOnClickListener(this)
         contentProviderTv.isEnabled = false
 
     }
 
+    private val time: String
+        get() = SimpleDateFormat("hh:mm:ss.SSS", Locale.ROOT).format(System.currentTimeMillis())
     private val threadPool = Executors.newSingleThreadExecutor()
+    private var file: File? = null
     override fun onClick(v: View?) {
         when (v?.id) {
             R.id.fileTestTv -> {
-                /*  val intent = Intent(this, IPCService::class.java)
-                  bindService(intent, mCon, Service.BIND_AUTO_CREATE)*/
+                file?.let {
+                    val str = "Write by Client-$time"
+                    FileStreamUtil.writeChar(it, str)
+                    clientMessengerHandler.service?.let { service ->
+                        notifyFileChange(service)
+                    }
+                }
             }
             R.id.unBindServiceTv -> {
                 unbindService(mCon)
@@ -117,7 +124,6 @@ class IPCActivity : AppCompatActivity(), View.OnClickListener {
             }
             R.id.socketTv -> {
                 threadPool.execute {
-                    val time = SimpleDateFormat("hh:mm:ss.SSS", Locale.ROOT).format(System.currentTimeMillis())
                     mPrintWriter?.println("Hello Socket:$time")
                 }
             }
@@ -131,20 +137,33 @@ class IPCActivity : AppCompatActivity(), View.OnClickListener {
     }
 
 
-    fun setContextText(bundle: Bundle) {
+    fun setSecondContentText(bundle: Bundle) {
         secondContentTv.text = ""
         secondContentTv.append(bundle.getString(RECEIVE_FROM_SERVICE_DATA))
         secondContentTv.append("\n")
     }
 
 
-    fun setContextText(str: String) {
+    fun setFirstContentText(str: String) {
         firstContentTv.append(str)
         firstContentTv.append("\n")
     }
 
+    fun receiveFileChange() {
+        file?.let { file ->
+            FileStreamUtil.readChar(file) {
+                setFirstContentText("File: $it-$time")
+            }
+        }
+
+    }
+
     fun sendMsgNormal(service: Messenger) {
         service.send(Message.obtain(null, IPCService.RECEIVE_FROM_CLIENT_CODE_NORMAL))
+    }
+
+    private fun notifyFileChange(service: Messenger) {
+        service.send(Message.obtain(null, IPCService.RECEIVE_FROM_CLIENT_CODE_FILE))
     }
 
     private fun sendMsgInit(service: Messenger) {
@@ -176,7 +195,6 @@ class IPCActivity : AppCompatActivity(), View.OnClickListener {
                 while (!this.isFinishing) {
                     var msg = it.readLine()
                     if (!msg.isNullOrEmpty()) {
-                        val time = SimpleDateFormat("hh:mm:ss.SSS", Locale.ROOT).format(System.currentTimeMillis())
                         msg = "$msg-$time"
                         clientMessengerHandler.obtainMessage(LOCAL_SOCKET_SEND_MESSAGE, msg).sendToTarget()
                     }
@@ -212,7 +230,10 @@ class IPCActivity : AppCompatActivity(), View.OnClickListener {
                     }
                 }
                 RECEIVE_FROM_SERVICE_CODE_NORMAL -> {
-                    activity.get()?.setContextText(msg.data)
+                    activity.get()?.setSecondContentText(msg.data)
+                }
+                RECEIVE_FROM_SERVICE_CODE_FILE -> {
+                    activity.get()?.receiveFileChange()
                 }
                 LOCAL_SOCKET_CONNECTED -> { // socket 连接创建完毕
                     activity.get()?.contentProviderTv?.isEnabled = true
@@ -220,7 +241,7 @@ class IPCActivity : AppCompatActivity(), View.OnClickListener {
                 LOCAL_SOCKET_SEND_MESSAGE -> { // socket 回传信息
                     val time = SimpleDateFormat("hh:mm:ss.SSS", Locale.ROOT).format(System.currentTimeMillis())
                     val message = (msg.obj?.toString() ?: "Empty") + "-$time"
-                    activity.get()?.setContextText(message)
+                    activity.get()?.setFirstContentText(message)
                 }
             }
             super.handleMessage(msg)

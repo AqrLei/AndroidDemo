@@ -5,6 +5,7 @@ import android.content.Intent
 import android.os.*
 import android.util.Log
 import com.open.aqrlei.ipc.contentprovider.OrderProvider
+import com.open.aqrlei.ipc.file.FileStreamUtil
 import kotlinx.coroutines.Job
 import java.io.*
 import java.net.ServerSocket
@@ -22,6 +23,7 @@ class IPCService : Service() {
         const val AIDL_BINDER_CODE = 1
         const val RECEIVE_FROM_CLIENT_CODE_INIT = 2
         const val RECEIVE_FROM_CLIENT_CODE_NORMAL = 21
+        const val RECEIVE_FROM_CLIENT_CODE_FILE = 31
     }
 
     private var changeListener: IChangeListener? = null
@@ -47,7 +49,22 @@ class IPCService : Service() {
                                     }
                                 }
                                 RECEIVE_FROM_CLIENT_CODE_NORMAL -> {
-                                    client?.let { sendMsg(it) }
+                                    client?.let { sendContentProviderMsg(it) }
+                                }
+                                RECEIVE_FROM_CLIENT_CODE_FILE -> {
+                                    FileStreamUtil.getCacheFile(this@IPCService)?.let { file ->
+                                        FileStreamUtil.readChar(file) {
+                                            Log.d("IPC_FILE", it)
+                                        }
+                                        val time = SimpleDateFormat("hh:mm:ss.SSS", Locale.ROOT).format(System.currentTimeMillis())
+                                        val str = "write by service-$time"
+                                        FileStreamUtil.writeChar(file, str)
+                                        client?.let {
+                                            notifyFileWrite(it)
+                                        }
+
+                                    }
+
                                 }
                                 else -> {
                                     super.handleMessage(msg)
@@ -105,7 +122,11 @@ class IPCService : Service() {
         client.send(Message.obtain(null, IPCActivity.RECEIVE_FROM_SERVICE_CODE_INIT))
     }
 
-    fun sendMsg(client: Messenger) {
+    fun notifyFileWrite(client: Messenger) {
+        client.send(Message.obtain(null, IPCActivity.RECEIVE_FROM_SERVICE_CODE_FILE))
+    }
+
+    fun sendContentProviderMsg(client: Messenger) {
         val sb = StringBuilder()
         try {
             contentResolver.query(OrderProvider.ORDER_URL, null, null, null, null)?.use { cursor ->
