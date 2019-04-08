@@ -11,6 +11,7 @@ import java.io.*
 
 object FileStreamUtil {
 
+    fun getObjectFile(context: Context) = getCacheFile(context, "object_test")
     fun getCacheFile(context: Context, uniqueName: String = "ipc_test.text"): File? {
         val cachePath =
                 if (Environment.MEDIA_MOUNTED == Environment.getExternalStorageState() || !Environment.isExternalStorageRemovable())
@@ -21,6 +22,10 @@ object FileStreamUtil {
         return File("$cachePath${File.separator}$uniqueName")
     }
 
+    /**
+     * @param file 写入内容的文件
+     * @param content 要写入的字符串
+     * */
     fun writeChar(file: File, content: String = "Hello IPC File"): Boolean {
         return try {
             BufferedWriter(FileWriter(file, true)).use { bWriter ->
@@ -34,7 +39,9 @@ object FileStreamUtil {
         }
     }
 
-    fun getObjectFile(context: Context) = getCacheFile(context, "object_test")
+    /**
+     * @param user 要写入的可序列化对象
+     * */
     fun writeObject(file: File?, user: User): Boolean {
         return try {
             ObjectOutputStream(FileOutputStream(file)).use {
@@ -48,6 +55,9 @@ object FileStreamUtil {
         }
     }
 
+    /**
+     * 读取写入文件的序列化对象
+     * */
     fun readObject(file: File?, action: (User?) -> Unit) {
         if (file == null) {
             return
@@ -62,6 +72,9 @@ object FileStreamUtil {
         }
     }
 
+    /**
+     * 读取写入文件的字符
+     * */
     fun readChar(file: File, action: (String) -> Unit) {
         try {
             BufferedReader(FileReader(file)).use { bReader ->
