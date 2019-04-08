@@ -2,6 +2,7 @@ package com.open.aqrlei.ipc
 
 import android.app.Service
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.os.*
 import android.util.Log
 import com.open.aqrlei.ipc.contentprovider.OrderProvider
@@ -27,7 +28,6 @@ class IPCService : Service() {
         const val RECEIVE_FROM_CLIENT_CODE_FILE = 31
     }
 
-    private var changeListener: IChangeListener? = null
     private var client: Messenger? = null
     private var job: Job? = null
     private var serviceMessengerHandler: Handler? = null
@@ -93,22 +93,32 @@ class IPCService : Service() {
             }
         }
     }
+    private val mListener = object:IChangeListener.Stub(){
+        override fun msgChange(info: Info?) {
+
+        }
+    }
+
     private val listenerList = RemoteCallbackList<IChangeListener>()
     private val mListenerManager = object : IListenerManager.Stub() {
         override fun registerChangeListener(listener: IChangeListener?) {
-            changeListener = listener
             listenerList.register(listener)
-            //必须先调用这个方法
-            val n = listenerList.beginBroadcast()
-            for (i in 0 until n) {
-                listenerList.getBroadcastItem(0).msgChange(Info("receive from service", 0))
-            }
-            listenerList.finishBroadcast()
+            sendMsgChange(Info("receive from service", 0))
         }
 
         override fun unregisterChangeListener(listener: IChangeListener?) {
             listenerList.unregister(listener)
         }
+    }
+
+    fun sendMsgChange(info: Info) {
+
+        //必须先调用这个方法
+        val n = listenerList.beginBroadcast()
+        for (i in 0 until n) {
+            listenerList.getBroadcastItem(0).msgChange(info)
+        }
+        listenerList.finishBroadcast()
     }
 
     private var serviceDestroyed = false
@@ -117,8 +127,15 @@ class IPCService : Service() {
         super.onCreate()
     }
 
-    override fun onBind(intent: Intent?): IBinder {
-        return mIBinderPool
+    override fun onBind(intent: Intent?): IBinder? {
+        val check = checkCallingOrSelfPermission("com.aqrlei.permission.PROVIDER")
+        return if (check == PackageManager.PERMISSION_DENIED) {
+            null
+        } else {
+            mIBinderPool
+        }
+
+
     }
 
     override fun onUnbind(intent: Intent?): Boolean {
@@ -135,7 +152,6 @@ class IPCService : Service() {
     private fun clear() {
         serviceMessengerHandler = null
         job = null
-        changeListener = null
         client = null
     }
 
@@ -225,7 +241,7 @@ class IPCService : Service() {
                     Log.d("Socket", "TcpServer response $str")
                     val time = SimpleDateFormat("hh:mm:ss.SSS", Locale.ROOT).format(System.currentTimeMillis())
                     outWriter?.println("通过Socket回传：$str-$time")
-                    changeListener?.msgChange(Info("AIDL回传：$str-$time", -1))
+                    sendMsgChange(Info("AIDL回传：$str-$time", -1))
                     /*outWriter?.close()
                     inReader?.close()*/
                 }

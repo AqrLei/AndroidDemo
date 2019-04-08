@@ -53,6 +53,7 @@ public interface IChangeListener extends android.os.IInterface {
         @Override
         public boolean onTransact(int code, android.os.Parcel data, android.os.Parcel reply, int flags) throws android.os.RemoteException {
             java.lang.String descriptor = DESCRIPTOR;
+            getCallingPid();
             switch (code) {
                 case INTERFACE_TRANSACTION: {
                     reply.writeString(descriptor);

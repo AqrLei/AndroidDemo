@@ -41,7 +41,6 @@ class IPCActivity : AppCompatActivity(), View.OnClickListener {
         }
     }
 
-
     private var mBinder: IBinderPool? = null
     private val clientMessengerHandler: ClientMessengerHandler
             by lazy {
