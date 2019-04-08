@@ -11,6 +11,7 @@ import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import com.open.aqrlei.ipc.contentprovider.OrderProvider
 import com.open.aqrlei.ipc.file.FileStreamUtil
+import com.open.aqrlei.ipc.file.User
 import kotlinx.android.synthetic.main.activity_ipc.*
 import java.io.*
 import java.lang.ref.WeakReference
@@ -104,6 +105,7 @@ class IPCActivity : AppCompatActivity(), View.OnClickListener {
         thread {
             connectTcpServer()
         }
+        objectFile = FileStreamUtil.getObjectFile(this)
 
     }
 
@@ -120,16 +122,19 @@ class IPCActivity : AppCompatActivity(), View.OnClickListener {
         get() = SimpleDateFormat("hh:mm:ss.SSS", Locale.ROOT).format(System.currentTimeMillis())
     private val threadPool = Executors.newSingleThreadExecutor()
     private var file: File? = null
+    private var objectFile: File? = null
     override fun onClick(v: View?) {
         when (v?.id) {
             R.id.fileTestTv -> {
                 file?.let {
                     val str = "Write by Client-$time"
                     FileStreamUtil.writeChar(it, str)
+                    FileStreamUtil.writeObject(objectFile, User("Client", time))
                     clientMessengerHandler.service?.let { service ->
                         notifyFileChange(service)
                     }
                 }
+
             }
             R.id.unBindServiceTv -> {
                 unbindService(mCon)
@@ -167,7 +172,13 @@ class IPCActivity : AppCompatActivity(), View.OnClickListener {
             FileStreamUtil.readChar(file) {
                 setFirstContentText("File: $it-$time")
             }
+            FileStreamUtil.readObject(objectFile) {
+                if (it != null) {
+                    setFirstContentText("User: ${it?.name}-${it?.time}")
+                }
+            }
         }
+
 
     }
 

@@ -34,6 +34,34 @@ object FileStreamUtil {
         }
     }
 
+    fun getObjectFile(context: Context) = getCacheFile(context, "object_test")
+    fun writeObject(file: File?, user: User): Boolean {
+        return try {
+            ObjectOutputStream(FileOutputStream(file)).use {
+                it.writeObject(user)
+                it.flush()
+                true
+            }
+
+        } catch (e: Exception) {
+            false
+        }
+    }
+
+    fun readObject(file: File?, action: (User?) -> Unit) {
+        if (file == null) {
+            return
+        }
+        try {
+            ObjectInputStream(FileInputStream(file)).use {
+                val user = it.readObject() as? User
+                action(user)
+            }
+        } catch (e: Exception) {
+            action(null)
+        }
+    }
+
     fun readChar(file: File, action: (String) -> Unit) {
         try {
             BufferedReader(FileReader(file)).use { bReader ->

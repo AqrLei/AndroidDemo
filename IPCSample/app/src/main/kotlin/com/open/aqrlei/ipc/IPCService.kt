@@ -6,6 +6,7 @@ import android.os.*
 import android.util.Log
 import com.open.aqrlei.ipc.contentprovider.OrderProvider
 import com.open.aqrlei.ipc.file.FileStreamUtil
+import com.open.aqrlei.ipc.file.User
 import kotlinx.coroutines.Job
 import java.io.*
 import java.net.ServerSocket
@@ -56,9 +57,16 @@ class IPCService : Service() {
                                         FileStreamUtil.readChar(file) {
                                             Log.d("IPC_FILE", it)
                                         }
+                                        FileStreamUtil.readObject(FileStreamUtil.getObjectFile(this@IPCService)) {
+                                            if (it != null) {
+                                                Log.d("IPC_FILE", "User: name:${it.name}-time:${it.time}")
+                                            }
+                                        }
                                         val time = SimpleDateFormat("hh:mm:ss.SSS", Locale.ROOT).format(System.currentTimeMillis())
                                         val str = "write by service-$time"
                                         FileStreamUtil.writeChar(file, str)
+                                        val objectFile = FileStreamUtil.getObjectFile(this@IPCService)
+                                        FileStreamUtil.writeObject(objectFile, User("service", time))
                                         client?.let {
                                             notifyFileWrite(it)
                                         }
