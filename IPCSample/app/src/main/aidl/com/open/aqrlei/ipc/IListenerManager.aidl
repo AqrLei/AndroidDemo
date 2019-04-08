@@ -9,5 +9,7 @@ interface IListenerManager {
      * Demonstrates some basic types that you can use as parameters
      * and return values in AIDL.
      */
-    void setChangeListener(IChangeListener listener);
+    void registerChangeListener(in IChangeListener listener);
+
+    void unregisterChangeListener(in IChangeListener listener);
 }

@@ -93,13 +93,21 @@ class IPCService : Service() {
             }
         }
     }
+    private val listenerList = RemoteCallbackList<IChangeListener>()
     private val mListenerManager = object : IListenerManager.Stub() {
-        override fun setChangeListener(listener: IChangeListener?) {
+        override fun registerChangeListener(listener: IChangeListener?) {
             changeListener = listener
-            thread {
-                SystemClock.sleep(1000)
-                changeListener?.msgChange(Info("receive from service", 0))
+            listenerList.register(listener)
+            //必须先调用这个方法
+            val n = listenerList.beginBroadcast()
+            for (i in 0 until n) {
+                listenerList.getBroadcastItem(0).msgChange(Info("receive from service", 0))
             }
+            listenerList.finishBroadcast()
+        }
+
+        override fun unregisterChangeListener(listener: IChangeListener?) {
+            listenerList.unregister(listener)
         }
     }
 

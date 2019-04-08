@@ -73,7 +73,7 @@ class IPCActivity : AppCompatActivity(), View.OnClickListener {
                             clientMessengerHandler.service = Messenger(it.queryBinder(IPCService.MESSENGER_BINDER_CODE))
                             sendMsgInit(clientMessengerHandler.service!!)
                             listenerManager = IListenerManager.Stub.asInterface(it.queryBinder(IPCService.AIDL_BINDER_CODE))
-                            listenerManager?.setChangeListener(changeListener)
+                            listenerManager?.registerChangeListener(changeListener)
                         }
                     }
 
