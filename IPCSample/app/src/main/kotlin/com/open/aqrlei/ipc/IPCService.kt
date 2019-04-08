@@ -36,16 +36,20 @@ class IPCService : Service() {
         @Throws(RemoteException::class)
         override fun queryBinder(binderCode: Int): IBinder {
             return when (binderCode) {
-                MESSENGER_BINDER_CODE -> {
-                    /*此处必须加上Looper.getMainLooper()*/
+                MESSENGER_BINDER_CODE -> { // Binder 连接池，选用Messenger
+
+                    // 运行在Binder线程池中
+                    // 此处必须加上Looper.getMainLooper()
                     serviceMessengerHandler = object : Handler(Looper.getMainLooper()) {
                         override fun handleMessage(msg: Message?) {
                             when (msg?.what) {
-                                RECEIVE_FROM_CLIENT_CODE_INIT -> {
-                                    if (client != msg.replyTo) {
+                                RECEIVE_FROM_CLIENT_CODE_INIT -> { //初次信息传递
+
+                                    if (client != msg.replyTo) {// 获取客户端返回的Messenger，用于之后两端通信
                                         client = msg.replyTo
                                     }
                                     client?.let {
+                                        //通知客户端，首次消息接收成功
                                         sendMsgInit(it)
                                     }
                                 }
@@ -80,6 +84,7 @@ class IPCService : Service() {
                             }
                         }
                     }
+                    //返回binder给客户端
                     Messenger(serviceMessengerHandler).binder
                 }
                 else -> {

@@ -7,7 +7,7 @@ An Android IPC  sample
 
 - Messenger(使用场景,源码分析，示例; 基于AIDL也就是说底层是Binder)
 
-- AIDL(各种示例,使用场景)
+- AIDL(注意事项，可用的数据类型,示例)
 
 - ContentProvider(源码分析，使用示例) 
 
