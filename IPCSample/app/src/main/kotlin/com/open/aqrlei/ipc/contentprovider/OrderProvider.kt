@@ -5,6 +5,7 @@ import android.content.ContentValues
 import android.content.UriMatcher
 import android.database.Cursor
 import android.net.Uri
+import android.os.Bundle
 import com.open.aqrlei.ipc.contentprovider.database.DatabaseOperator
 
 /**
@@ -49,6 +50,11 @@ class OrderProvider : ContentProvider() {
 
     override fun getType(uri: Uri): String? {
         return null
+    }
+
+    //自定义的数据访问
+    override fun call(method: String, arg: String?, extras: Bundle?): Bundle? {
+        return Bundle()
     }
 
 }
