@@ -202,23 +202,27 @@ class IPCActivity : AppCompatActivity(), View.OnClickListener {
     private var mPrintWriter: PrintWriter? = null
     private fun connectTcpServer() {
         var socket: Socket? = null
-        while (socket == null) {
+        while (socket == null) {  // 连接失败的话，每隔1秒重连一次
             try {
+                //连接到本地端口
                 socket = Socket("localhost", 9999)
                 mClientSocket = socket
+                // 用于向服务端写入数据
                 mPrintWriter = PrintWriter(BufferedWriter(OutputStreamWriter(socket.getOutputStream())), true)
+                //通过Handler通知Socket连接成功
                 clientMessengerHandler.sendEmptyMessage(LOCAL_SOCKET_CONNECTED)
             } catch (e: IOException) {
                 SystemClock.sleep(1000)
             }
         }
-
         try {
+            //获取服务端发送的数据
             BufferedReader(InputStreamReader(socket.getInputStream())).use {
                 while (!this.isFinishing) {
                     var msg = it.readLine()
                     if (!msg.isNullOrEmpty()) {
                         msg = "$msg-$time"
+                        //通过Handler将数据发送到UI线程处理
                         clientMessengerHandler.obtainMessage(LOCAL_SOCKET_SEND_MESSAGE, msg).sendToTarget()
                     }
                 }
@@ -226,7 +230,6 @@ class IPCActivity : AppCompatActivity(), View.OnClickListener {
         } catch (e: IOException) {
             e.printStackTrace()
         }
-
     }
 
 
