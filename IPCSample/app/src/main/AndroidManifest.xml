@@ -34,6 +34,7 @@
         <provider
             android:name=".contentprovider.OrderProvider"
             android:authorities="aqrlei.OrderProvider"
+            android:process=":remote"
             android:permission="com.aqrlei.permission.PROVIDER" />
         <service
             android:name=".IPCService"

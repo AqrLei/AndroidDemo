@@ -12,6 +12,7 @@ import com.open.aqrlei.ipc.contentprovider.database.DatabaseOperator
  */
 class OrderProvider : ContentProvider() {
     companion object {
+        //必须和AndroidManifest.xml中配置的一样，这是ContentProvider的唯一标识
         private const val AUTHORITY = "aqrlei.OrderProvider"
 
         val ORDER_URL = Uri.parse("content://$AUTHORITY/order")
