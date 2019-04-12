@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="SampleView">
+        <attr name="slideMode" format="enum">
+            <enum name="scroll" value="0"/>
+            <enum name="smoothScroll" value="10"/>
+            <enum name="animation" value="1"/>
+            <enum name="animator" value="2"/>
+            <enum name="animatorScroll" value="12"/>
+            <enum name="layoutParams" value="3"/>
+            <enum name="handlerSmooth" value="13"/>
+        </attr>
+
+    </declare-styleable>
+</resources>
