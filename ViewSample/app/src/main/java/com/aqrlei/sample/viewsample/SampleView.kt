@@ -67,6 +67,23 @@ class SampleView @JvmOverloads constructor(
         }
     }
 
+    override fun dispatchTouchEvent(event: MotionEvent?): Boolean {
+        when(event?.action){
+            //ACTION_DOWN在父元素中默认不拦截，如果拦截了ACTION_DOWN的话之后的事件都不会传递
+            MotionEvent.ACTION_DOWN ->{
+                //父元素不拦截事件
+                parent.requestDisallowInterceptTouchEvent(true)
+            }
+            MotionEvent.ACTION_MOVE ->{
+                if (parentNeedEvent()){
+                    parent.requestDisallowInterceptTouchEvent(false)
+                }
+            }
+        }
+        return super.dispatchTouchEvent(event)
+    }
+    private fun parentNeedEvent():Boolean = false
+
     override fun onTouchEvent(event: MotionEvent?): Boolean {
 
         Log.d("View", "left:$left-top:$top-right:$right-bottom:$bottom")

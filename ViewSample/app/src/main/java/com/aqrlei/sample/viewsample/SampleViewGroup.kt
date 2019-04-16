@@ -67,6 +67,29 @@ class SampleViewGroup @JvmOverloads constructor(
         }
     }
 
+
+    override fun onInterceptTouchEvent(ev: MotionEvent?): Boolean {
+    /*    var intercepted = false
+        when(ev?.action){
+            //如果拦截了ACTION_DOWN,后续的事件都会在当前View中处理
+            //子View中的onClick(在ACTION_UP的时候)之类的事件也不会触发
+            MotionEvent.ACTION_DOWN ->{
+                intercepted =false
+            }
+            MotionEvent.ACTION_MOVE ->{
+                //是否需要事件
+                intercepted = needMotionEvent()
+            }
+            // 如果在这之前已经拦截了，返回true和false 相差不大
+            // 如果之前没有拦截，此处返回了true，那么子View中设置的onClick(ACTION_UP的时候)就会无效
+            MotionEvent.ACTION_UP ->{
+                intercepted = false
+            }
+        }
+        return intercepted*/
+        return ev?.action != MotionEvent.ACTION_DOWN
+    }
+    private fun needMotionEvent():Boolean =false
     override fun onTouchEvent(event: MotionEvent?): Boolean {
 
         Log.d("View", "left:$left-top:$top-right:$right-bottom:$bottom")
