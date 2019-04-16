@@ -85,6 +85,7 @@ class SampleViewGroup @JvmOverloads constructor(
                     scrollTo(-event.x.toInt(), 0)
                     Log.d("Scroll", "After: $scrollX - $scrollY")
                 }
+                //重写computeScroll实现
                 SLIDE_MODE_SMOOTH_SCROLL -> smoothScrollTo(-event.x.toInt())
                 //移动后，点击响应的位置还在原来的区域
                 // left,top,right,bottom属性不变
@@ -112,6 +113,7 @@ class SampleViewGroup @JvmOverloads constructor(
                     val translateTime = (Math.abs(event.x - x) / 100 * 100).toLong()
                     ObjectAnimator.ofFloat(this, "translationX", x, event.x).setDuration(translateTime).start()
                 }
+                //动画实现弹性滑动
                 SLIDE_MODE_ANIMATOR_SCROLL -> {
                     lastScrollX = scrollX
                     mScrollX = -event.x.toInt() - scrollX
@@ -137,6 +139,7 @@ class SampleViewGroup @JvmOverloads constructor(
                         this@SampleViewGroup.requestLayout()
                     }
                 }
+                //通过Handler#sendMessageDelay实现弹性滑动
                 SLIDE_MODE_HANDLER_SMOOTH -> {
                     lastScrollX = scrollX
                     mScrollX = -event.x.toInt() - scrollX
